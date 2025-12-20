@@ -27,12 +27,17 @@ function AddPasswordContent() {
     setLoading(true)
 
     try {
-      await axiosInstance.post("/addnewpassword", {
-        appName,
-        username,
-        password, // Send plaintext - backend handles encryption
-      })
+      
+    const token = localStorage.getItem("token"); // or wherever you store JWT
 
+    await axiosInstance.post("/addnewpassword",
+      { appName, username, password },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
       toast({
         title: "Success!",
         description: "Password saved securely to your vault",
