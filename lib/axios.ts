@@ -2,7 +2,7 @@ import axios from "axios"
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
-  baseURL: "https://eatro-hlcb.onrender.com/api", // Adjust port as needed
+  baseURL: "https://eatro-hlcb.onrender.com/api/auth", // Adjust port as needed
   withCredentials: true, // Important for refresh token cookie
   headers: {
     "Content-Type": "application/json",
