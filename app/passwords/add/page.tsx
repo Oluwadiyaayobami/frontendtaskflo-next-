@@ -22,47 +22,22 @@ function AddPasswordContent() {
   const { toast } = useToast()
   const router = useRouter()
 
-  // Function to request a new access token from the backend
-  const getAccessToken = async () => {
-    try {
-      const response = await axiosInstance.post(
-        "/refresh", // backend endpoint for refreshing token
-        {},
-        { withCredentials: true } // sends HTTP-only refresh token cookie automatically
-      )
-      return response.data.acesstoken // backend should return JWT
-    } catch (err) {
-      console.error("Failed to get access token", err)
-      return null
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Request access token from backend
-      const token = await getAccessToken()
-      if (!token) {
-        toast({
-          title: "Authentication error",
-          description: "Could not get access token. Please login again.",
-          variant: "destructive",
-        })
-        setLoading(false)
-        return
+      
+    const token = localStorage.getItem("token"); // or wherever you store JWT
+
+    await axiosInstance.post("/addnewpassword",
+      { appName, username, password },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-
-      // Send password creation request with token in headers
-      await axiosInstance.post(
-        "/addnewpassword",
-        { appName, username, password },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-
+    )
       toast({
         title: "Success!",
         description: "Password saved securely to your vault",
