@@ -26,7 +26,7 @@ function ViewTodosContent() {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const response = await axiosInstance.get("/todos")
+        const response = await axiosInstance.get("/todos/view")
         setTodos(response.data.fetchingalltodo || [])
       } catch (error: any) {
         if (error.response?.status === 404) {

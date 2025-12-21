@@ -201,7 +201,7 @@ function DashboardContent() {
             </Card>
           </Link>
 
-          <Link href="/todos">
+          <Link href="/todos/view">
             <Card className="border-border hover:shadow-lg transition-all hover:border-primary cursor-pointer h-full">
               <CardHeader>
                 <CheckSquare className="h-10 w-10 text-accent mb-2" />
