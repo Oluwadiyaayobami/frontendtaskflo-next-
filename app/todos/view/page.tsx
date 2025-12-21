@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { ArrowLeft, CheckSquare, Plus, Loader2 } from "lucide-react"
+import { ArrowLeft, CheckSquare, Plus, Loader2, Calendar } from "lucide-react"
 import axiosInstance from "@/lib/axios"
 
 interface Todo {
   title: string
   description: string
+  createdAt: string
 }
 
 function ViewTodosContent() {
@@ -41,6 +42,17 @@ function ViewTodosContent() {
 
     fetchTodos()
   }, [toast])
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,15 +101,26 @@ function ViewTodosContent() {
               </div>
             ) : (
               <div className="space-y-4">
-                {todos.map((todo) => (
-                  <Card key={todo.title} className="border-border bg-card hover:border-primary transition-colors">
+                {todos.map((todo, index) => (
+                  <Card
+                    key={`${todo.title}-${index}`}
+                    className="border-border bg-card hover:border-primary transition-colors"
+                  >
                     <CardHeader>
-                      <CardTitle className="text-xl text-card-foreground">{todo.title}</CardTitle>
-                      {todo.description && (
-                        <CardDescription className="text-muted-foreground whitespace-pre-wrap">
-                          {todo.description}
-                        </CardDescription>
-                      )}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl text-card-foreground">{todo.title}</CardTitle>
+                          {todo.description && (
+                            <CardDescription className="text-muted-foreground whitespace-pre-wrap mt-2">
+                              {todo.description}
+                            </CardDescription>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3 pt-3 border-t border-border">
+                        <Calendar className="h-4 w-4" />
+                        <span>Created {formatDate(todo.createdAt)}</span>
+                      </div>
                     </CardHeader>
                   </Card>
                 ))}
