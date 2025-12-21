@@ -42,7 +42,7 @@ function AddTodoContent() {
 
       // Redirect to view todos page after 1 second
       setTimeout(() => {
-        router.push("/todos")
+        router.push("/todos/view")
       }, 1000)
     } catch (error: any) {
       toast({
