@@ -26,11 +26,10 @@ function ViewTodosContent() {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const response = await axiosInstance.get("/todos/viewp")
+        const response = await axiosInstance.get("/todos/view")
         setTodos(response.data.fetchingalltodo || [])
       } catch (error: any) {
         if (error.response?.status === 404) {
-          // No todos found - empty state
           setTodos([])
         } else {
           toast({
