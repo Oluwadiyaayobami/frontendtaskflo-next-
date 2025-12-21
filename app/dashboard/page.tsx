@@ -159,7 +159,7 @@ function DashboardContent() {
           </h1>
           <p className="text-muted-foreground">
             {"User ID: "}
-            {user?.id || "N/A"}
+            
           </p>
         </div>
 
