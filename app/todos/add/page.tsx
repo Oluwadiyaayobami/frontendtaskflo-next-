@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import { Button } from "@/components/ui/button"
@@ -11,23 +10,49 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { ArrowLeft, CheckSquare } from "lucide-react"
+import { ArrowLeft, CheckSquare, Loader2 } from "lucide-react"
+import axiosInstance from "@/lib/axios"
+import { useRouter } from "next/navigation"
 
 function AddTodoContent() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
 
-    // UI-ready structure (backend integration optional)
-    toast({
-      title: "Coming Soon",
-      description: "Todo management feature is under development",
-    })
+    try {
+      const response = await axiosInstance.post("/todos/add", {
+        title,
+        description,
+      })
 
-    console.log("[v0] Todo data prepared:", { title, description })
+      toast({
+        title: "Success",
+        description: response.data.message || "Todo created successfully",
+      })
+
+      // Reset form
+      setTitle("")
+      setDescription("")
+
+      // Redirect to view todos page after 1 second
+      setTimeout(() => {
+        router.push("/todos")
+      }, 1000)
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to create todo",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -61,6 +86,7 @@ function AddTodoContent() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -72,16 +98,18 @@ function AddTodoContent() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={5}
+                  disabled={loading}
                 />
                 <p className="text-sm text-muted-foreground">{"Optional: Add more context or notes"}</p>
               </div>
 
               <div className="flex gap-3">
-                <Button type="submit" className="flex-1">
+                <Button type="submit" className="flex-1" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Create Todo
                 </Button>
                 <Link href="/dashboard">
-                  <Button type="button" variant="outline">
+                  <Button type="button" variant="outline" disabled={loading}>
                     Cancel
                   </Button>
                 </Link>

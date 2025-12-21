@@ -1,115 +1,124 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import ProtectedRoute from "@/components/ProtectedRoute"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { Shield, Lock, CheckCircle, Zap } from "lucide-react"
+import { ArrowLeft, CheckSquare, Plus, Loader2 } from "lucide-react"
+import axiosInstance from "@/lib/axios"
 
-export default function Home() {
+interface Todo {
+  _id: string
+  title: string
+  description: string
+  userid: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+function ViewTodosContent() {
+  const [todos, setTodos] = useState<Todo[]>([])
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
+
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const response = await axiosInstance.get("/todos/view")
+        setTodos(response.data.fetchingalltodo || [])
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          // No todos found - empty state
+          setTodos([])
+        } else {
+          toast({
+            title: "Error",
+            description: error.response?.data?.message || "Failed to fetch todos",
+            variant: "destructive",
+          })
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTodos()
+  }, [toast])
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">SecureVault</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost">Login</Button>
-            </Link>
-            <Link href="/register">
-              <Button>Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
-            {"Secure Task Management & Password Vault"}
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 text-pretty">
-            {
-              "Manage your tasks and passwords in one secure, encrypted platform. Built for professionals who value security and productivity."
-            }
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/register">
-              <Button size="lg" className="text-lg px-8">
-                Start Free Trial
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
-                Sign In
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 border-border bg-card hover:shadow-lg transition-shadow">
-            <Shield className="h-12 w-12 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-card-foreground">End-to-End Encryption</h3>
-            <p className="text-muted-foreground">
-              {"Your passwords are encrypted with industry-standard algorithms. We never see your data."}
-            </p>
-          </Card>
-
-          <Card className="p-6 border-border bg-card hover:shadow-lg transition-shadow">
-            <Lock className="h-12 w-12 text-accent mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-card-foreground">Zero-Knowledge Architecture</h3>
-            <p className="text-muted-foreground">
-              {"Only you have access to your vault. Not even our servers can decrypt your passwords."}
-            </p>
-          </Card>
-
-          <Card className="p-6 border-border bg-card hover:shadow-lg transition-shadow">
-            <CheckCircle className="h-12 w-12 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-card-foreground">Task Management</h3>
-            <p className="text-muted-foreground">
-              {"Organize your work with powerful task management features integrated seamlessly."}
-            </p>
-          </Card>
-
-          <Card className="p-6 border-border bg-card hover:shadow-lg transition-shadow">
-            <Zap className="h-12 w-12 text-accent mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-card-foreground">Lightning Fast</h3>
-            <p className="text-muted-foreground">
-              {"Built with modern technologies for instant access to your secure vault anywhere."}
-            </p>
-          </Card>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <Card className="bg-primary text-primary-foreground p-12 text-center">
-          <h2 className="text-4xl font-bold mb-4">{"Ready to secure your digital life?"}</h2>
-          <p className="text-xl mb-8 opacity-90">
-            {"Join thousands of professionals who trust SecureVault with their sensitive data."}
-          </p>
-          <Link href="/register">
-            <Button size="lg" variant="secondary" className="text-lg px-8">
-              Create Your Free Account
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/dashboard">
+            <Button variant="ghost">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
             </Button>
           </Link>
-        </Card>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2025 SecureVault. Built with security and privacy in mind.</p>
+          <Link href="/todos/add">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Todo
+            </Button>
+          </Link>
         </div>
-      </footer>
+
+        <Card className="border-border">
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <CheckSquare className="h-8 w-8 text-primary" />
+              <CardTitle className="text-3xl text-card-foreground">Your Todos</CardTitle>
+            </div>
+            <CardDescription className="text-muted-foreground">
+              {"Manage your tasks and stay organized"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : todos.length === 0 ? (
+              <div className="text-center py-12">
+                <CheckSquare className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-2 text-card-foreground">No todos yet</h3>
+                <p className="text-muted-foreground mb-4">{"Get started by creating your first task"}</p>
+                <Link href="/todos/add">
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Todo
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {todos.map((todo) => (
+                  <Card key={todo._id} className="border-border bg-card hover:border-primary transition-colors">
+                    <CardHeader>
+                      <CardTitle className="text-xl text-card-foreground">{todo.title}</CardTitle>
+                      {todo.description && (
+                        <CardDescription className="text-muted-foreground whitespace-pre-wrap">
+                          {todo.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
+  )
+}
+
+export default function ViewTodosPage() {
+  return (
+    <ProtectedRoute>
+      <ViewTodosContent />
+    </ProtectedRoute>
   )
 }
