@@ -10,12 +10,8 @@ import { ArrowLeft, CheckSquare, Plus, Loader2 } from "lucide-react"
 import axiosInstance from "@/lib/axios"
 
 interface Todo {
-  _id: string
   title: string
   description: string
-  userid: string
-  createdAt?: string
-  updatedAt?: string
 }
 
 function ViewTodosContent() {
@@ -94,7 +90,7 @@ function ViewTodosContent() {
             ) : (
               <div className="space-y-4">
                 {todos.map((todo) => (
-                  <Card key={todo._id} className="border-border bg-card hover:border-primary transition-colors">
+                  <Card key={todo.title} className="border-border bg-card hover:border-primary transition-colors">
                     <CardHeader>
                       <CardTitle className="text-xl text-card-foreground">{todo.title}</CardTitle>
                       {todo.description && (
