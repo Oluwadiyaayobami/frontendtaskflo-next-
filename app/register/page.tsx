@@ -3,30 +3,40 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useAuth } from "@/contexts/AuthContext"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Shield, Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function RegisterPage() {
-  const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const router = useRouter()
   const { register } = useAuth()
   const { toast } = useToast()
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    fullName: "",
+    agentName: "",
+    matricNumber: "",
+    roomNumber: "",
+    residence: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
         description: "Passwords do not match",
@@ -35,119 +45,172 @@ export default function RegisterPage() {
       return
     }
 
-    if (password.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setLoading(true)
+    setIsLoading(true)
 
     try {
-      await register(username, email, password)
+      const { confirmPassword, ...registerData } = formData
+      await register(registerData)
       toast({
-        title: "Success!",
-        description: "Account created successfully. Please login.",
+        title: "Success",
+        description: "Account created successfully",
       })
-      router.push("/login")
-    } catch (error: any) {
+      router.push("/dashboard")
+    } catch (error) {
       toast({
-        title: "Registration Failed",
-        description: error.message || "An error occurred during registration",
+        title: "Error",
+        description: "Failed to create account. Please try again.",
         variant: "destructive",
       })
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md border-border">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <Shield className="h-12 w-12 text-primary" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-card-foreground">Create Account</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {"Enter your details to create your secure vault"}
-          </CardDescription>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl">Create Account</CardTitle>
+          <CardDescription>Join CampusHub marketplace</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label htmlFor="fullName" className="text-sm font-medium">
+                  Full Name
+                </label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  placeholder="John Doe"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="agentName" className="text-sm font-medium">
+                  Agent Name
+                </label>
+                <Input
+                  id="agentName"
+                  name="agentName"
+                  placeholder="johndoe"
+                  value={formData.agentName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label htmlFor="matricNumber" className="text-sm font-medium">
+                  Matric Number
+                </label>
+                <Input
+                  id="matricNumber"
+                  name="matricNumber"
+                  placeholder="A00123456"
+                  value={formData.matricNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="roomNumber" className="text-sm font-medium">
+                  Room Number
+                </label>
+                <Input
+                  id="roomNumber"
+                  name="roomNumber"
+                  placeholder="101"
+                  value={formData.roomNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <label htmlFor="residence" className="text-sm font-medium">
+                Residence
+              </label>
               <Input
-                id="username"
-                type="text"
-                placeholder="johndoe"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="residence"
+                name="residence"
+                placeholder="Hall A"
+                value={formData.residence}
+                onChange={handleChange}
                 required
-                disabled={loading}
               />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
               <Input
                 id="email"
+                name="email"
                 type="email"
-                placeholder="john@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
                 required
-                disabled={loading}
               />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <label htmlFor="phoneNumber" className="text-sm font-medium">
+                Phone Number
+              </label>
               <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="phoneNumber"
+                name="phoneNumber"
+                placeholder="+1234567890"
+                value={formData.phoneNumber}
+                onChange={handleChange}
                 required
-                disabled={loading}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="text-sm font-medium">
+                  Confirm
+                </label>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                "Create Account"
-              )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
-
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            {"Already have an account? "}
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Already have an account?{" "}
             <Link href="/login" className="text-primary hover:underline">
               Sign in
             </Link>
-          </div>
+          </p>
         </CardContent>
       </Card>
     </div>
